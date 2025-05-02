@@ -11,7 +11,7 @@ terraform {
   #   AWS_SECRET_ACCESS_KEY
   # For more details on the permissions needed (bucket policy), see: https://developer.hashicorp.com/terraform/language/backend/s3#permissions-required
   backend "s3" {
-    bucket         = "sumo-demo-content-as-code"
+    bucket         = "zak-tf-state"
     key            = "terraform-state"
     region         = "eu-west-2"
   }
