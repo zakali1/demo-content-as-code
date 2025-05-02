@@ -1,36 +1,33 @@
 name: Terraform
 
 on:
+  # Trigger on push events to the main branch (e.g., direct pushes or merges).
   push:
     branches: [ "main" ]
+
+  # Trigger on pull_request events targeting the main branch.
   pull_request:
     branches: [ "main" ]
+
+  # Enable manual triggers
   workflow_dispatch:
 
 jobs:
   terraform:
     runs-on: ubuntu-latest
     env:
+      # Pull AWS + Sumo Logic credentials from GitHub Secrets
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       SUMOLOGIC_ACCESSID: ${{ secrets.SUMOLOGIC_ACCESSID }}
       SUMOLOGIC_ACCESSKEY: ${{ secrets.SUMOLOGIC_ACCESSKEY }}
-      TF_LOG: ${{ vars.TF_LOG || 'info' }}
+
+      # Read TF_LOG from GitHub Actions variables, default to "info"
+      TF_LOG: ${{ vars.TF_LOG }}
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
-
-      - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: arn:aws:iam::730335505200:role/github-actions
-          aws-region: eu-west-2
-          role-session-name: github-actions-session
-          audience: sts.amazonaws.com
-
-      - name: Verify AWS Identity
-        run: |
-          aws sts get-caller-identity
-          aws iam get-role --role-name github-actions
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -44,6 +41,9 @@ jobs:
       - name: Terraform Plan
         run: terraform plan
 
+      # Run Terraform Apply if:
+      #   a) It's a push to main (e.g., a PR merge or direct push).
+      #   b) It's a manual workflow_dispatch event on main.
       - name: Terraform Apply
         if: ${{ github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') }}
         run: terraform apply -auto-approve
