@@ -13,6 +13,6 @@ terraform {
   backend "s3" {
     bucket         = "sumo-demo-content-as-code"
     key            = "terraform-state"
-    region         = "us-east-2"
+    region         = "eu-west-2"
   }
 }
