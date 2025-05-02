@@ -11,38 +11,34 @@ jobs:
   terraform:
     runs-on: ubuntu-latest
     env:
-      # Optional: if you need to log Terraform logs
-      TF_LOG: ${{ vars.TF_LOG }}
-      
+      SUMOLOGIC_ACCESSID: ${{ secrets.SUMOLOGIC_ACCESSID }}
+      SUMOLOGIC_ACCESSKEY: ${{ secrets.SUMOLOGIC_ACCESSKEY }}
+      TF_LOG: ${{ vars.TF_LOG || 'info' }}
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      # Step 1: Set up AWS credentials using OIDC
-      - name: Set up AWS credentials using OIDC
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: arn:aws:iam::730335505200:role/githubactions-test  # Role ARN you created
+          role-to-assume: arn:aws:iam::730335505200:role/githubactions-test
           aws-region: eu-west-2
+          role-session-name: github-actions-session
+          audience: sts.amazonaws.com
 
-      # Step 2: Set up Terraform
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      # Step 3: Initialize Terraform (this uses the S3 backend to store state)
       - name: Terraform Init
         run: terraform init
 
-      # Step 4: Validate Terraform configuration
       - name: Terraform Validate
         run: terraform validate
 
-      # Step 5: Plan Terraform changes
       - name: Terraform Plan
         run: terraform plan
 
-      # Step 6: Apply Terraform changes
       - name: Terraform Apply
         if: ${{ github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') }}
         run: terraform apply -auto-approve
-
