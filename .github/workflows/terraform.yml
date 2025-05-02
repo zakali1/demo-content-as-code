@@ -22,7 +22,7 @@ jobs:
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: arn:aws:iam::730335505200:role/githubactions-test
+          role-to-assume: arn:aws:iam::730335505200:role/github-actions
           aws-region: eu-west-2
           role-session-name: github-actions-session
           audience: sts.amazonaws.com
@@ -30,7 +30,7 @@ jobs:
       - name: Verify AWS Identity
         run: |
           aws sts get-caller-identity
-          aws iam get-role --role-name githubactions-test
+          aws iam get-role --role-name github-actions
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
