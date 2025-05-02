@@ -1,49 +1,48 @@
 name: Terraform
 
 on:
-  # Trigger on push events to the main branch (e.g., direct pushes or merges).
   push:
     branches: [ "main" ]
-
-  # Trigger on pull_request events targeting the main branch.
   pull_request:
     branches: [ "main" ]
-
-  # Enable manual triggers
   workflow_dispatch:
 
 jobs:
   terraform:
     runs-on: ubuntu-latest
     env:
-      # Pull AWS + Sumo Logic credentials from GitHub Secrets
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      SUMOLOGIC_ACCESSID: ${{ secrets.SUMOLOGIC_ACCESSID }}
-      SUMOLOGIC_ACCESSKEY: ${{ secrets.SUMOLOGIC_ACCESSKEY }}
-
-      # Read TF_LOG from GitHub Actions variables, default to "info"
+      # Optional: if you need to log Terraform logs
       TF_LOG: ${{ vars.TF_LOG }}
-
+      
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
 
+      # Step 1: Set up AWS credentials using OIDC
+      - name: Set up AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::730335505200:role/githubactions-test  # Role ARN you created
+          aws-region: eu-west-2
+
+      # Step 2: Set up Terraform
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
+      # Step 3: Initialize Terraform (this uses the S3 backend to store state)
       - name: Terraform Init
         run: terraform init
 
+      # Step 4: Validate Terraform configuration
       - name: Terraform Validate
         run: terraform validate
 
+      # Step 5: Plan Terraform changes
       - name: Terraform Plan
         run: terraform plan
 
-      # Run Terraform Apply if:
-      #   a) It's a push to main (e.g., a PR merge or direct push).
-      #   b) It's a manual workflow_dispatch event on main.
+      # Step 6: Apply Terraform changes
       - name: Terraform Apply
         if: ${{ github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') }}
         run: terraform apply -auto-approve
+
