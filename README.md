@@ -1,0 +1,2 @@
+# demo-content-as-code
+demo of content as code for sumologic CSIEM
