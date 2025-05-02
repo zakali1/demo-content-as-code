@@ -12,7 +12,7 @@ terraform {
   # For more details on the permissions needed (bucket policy), see: https://developer.hashicorp.com/terraform/language/backend/s3#permissions-required
   backend "s3" {
     bucket         = "zak-tf-state1"
-    key            = "terraform-state"
+    key            = "terraform-state/terraform.tfstate"
     region         = "eu-west-2"
   }
 }
