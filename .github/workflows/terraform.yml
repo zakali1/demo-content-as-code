@@ -27,6 +27,11 @@ jobs:
           role-session-name: github-actions-session
           audience: sts.amazonaws.com
 
+      - name: Verify AWS Identity
+        run: |
+          aws sts get-caller-identity
+          aws iam get-role --role-name githubactions-test
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
