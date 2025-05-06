@@ -1,4 +1,4 @@
-resource "sumologic_cse_match_rule" "sample_match_rule_1" {
+resource "sumologic_cse_match_rule" "sample_match_rule_2" {
   name = "(Sample) CVE-2024-50623 Exploitation Attempt - Cleo"
   enabled = true
   is_prototype = true
